@@ -1,0 +1,9 @@
+{
+  "name": "tg-proxy-backend",
+  "version": "1.0.0",
+  "main": "main.js",
+  "dependencies": {
+    "socks": "^2.8.3",
+    "ws": "^8.20.0"
+  }
+}
