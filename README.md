@@ -1,97 +1,50 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# TG Proxy 🚀
 
-# Getting Started
+**TG Proxy** — это Android-приложение, которое создает локальный SOCKS5 прокси-сервер прямо на вашем устройстве. Оно позволяет обходить сетевые ограничения для мессенджера Telegram без необходимости использовать общесистемный VPN.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 💡 Особенности
+* **Локальный роутинг:** Проксируется только трафик Telegram. Ваши банковские приложения, игры и браузер работают напрямую с родным пингом.
+* **Фоновая работа (Foreground Service):** Интегрирован нативный Android-сервис на Kotlin с несмахиваемым уведомлением. Приложение не убивается агрессивными системами энергосбережения (MIUI, ColorOS, HiOS, OneUI).
+* **Встроенный Node.js:** Под капотом работает полноценный движок Node.js (`nodejs-mobile-react-native`), который обрабатывает TCP-соединения.
+* **Real-time статистика:** Отображение активных соединений и переданного трафика в реальном времени.
 
-## Step 1: Start Metro
+## 🛠 Стек технологий
+* **Frontend:** React Native (TypeScript/JavaScript)
+* **Backend (Local):** Node.js
+* **Native Android:** Kotlin, Java, Gradle
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 📦 Установка (Для обычных пользователей)
+Вам не нужно ничего программировать. Просто скачайте готовый файл:
+1. Перейдите в раздел [Releases](../../releases) справа.
+2. Скачайте последний `.apk` файл.
+3. Установите на свой Android-смартфон, нажмите «Запустить» и затем «Открыть Telegram и подключить».
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+---
 
-```sh
-# Using npm
-npm start
+## 💻 Сборка из исходников (Для разработчиков)
 
-# OR using Yarn
-yarn start
-```
+Если вы хотите изучить код или собрать приложение самостоятельно, следуйте этой инструкции. Вам потребуется установленный Node.js, React Native CLI и Android Studio (или Android SDK).
 
-## Step 2: Build and run your app
+### 1. Подготовка
+Склонируйте репозиторий и установите JS-зависимости:
+```bash
+git clone https://github.com/nexWay2040/tg-proxy.git
+cd tg-proxy
+npm install
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+2. Запуск для разработки (Debug)
+Чтобы запустить приложение на подключенном устройстве или эмуляторе с поддержкой горячей перезагрузки (Hot Reload):
+npx react-native run-android
 
-### Android
+3. Сборка готового APK (Release)
+Чтобы скомпилировать оптимизированный установочный .apk файл:
+Для Windows:
+cd android
+gradlew assembleRelease
 
-```sh
-# Using npm
-npm run android
+Для macOS / Linux:
+cd android
+./gradlew assembleRelease
 
-# OR using Yarn
-yarn android
-```
+4.Готовый файл появится по пути: android/app/build/outputs/apk/release/app-release.apk
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
