@@ -1,7 +1,15 @@
 const rn_bridge = require('rn-bridge');
 const net = require('net');
 
-function log(msg) {
+// Переменная для хранения настроек из интерфейса
+let currentConfig = {};
+let isVerbose = false; // По умолчанию выключено
+
+// Умная функция логирования
+function log(msg, force = false) {
+  // Если verbose выключен, отправляем только важные логи (force = true)
+  if (!isVerbose && !force) return;
+  
   console.log("[PROXY] " + msg);
   rn_bridge.channel.send(JSON.stringify({ type: 'log', message: msg }));
 }
@@ -18,21 +26,27 @@ function isTelegramIp(ip) {
   try { return _TG_RANGES.some(([lo, hi]) => ipToInt(ip) >= lo && ipToInt(ip) <= hi); } catch (e) { return false; }
 }
 
-// ИСПРАВЛЕННАЯ СТАТИСТИКА: именно те названия, которые ждет App.tsx
 const stats = { connectionsTotal: 0, bytesUp: 0, bytesDown: 0 };
 let proxyServer = null;
 let isRunning = false;
 
-function startProxy(port = 1080, host = '127.0.0.1') {
+// ПРИНИМАЕМ КОНФИГ ИЗ APP.TSX
+function startProxy(port = 1080, host = '127.0.0.1', config = {}) {
   if (isRunning) return;
   
+  // Применяем настройки из App.tsx
+  currentConfig = config;
+  isVerbose = config.verbose === true;
+  
+  log(`Applying settings: Buffer=${config.bufferKb || 256}KB, Pool=${config.poolSize || 4}, Verbose=${isVerbose}`, true);
+
   proxyServer = net.createServer((clientSocket) => {
     let isActive = true;
-    stats.connectionsTotal++; // Плюс соединение
+    stats.connectionsTotal++; 
     log(`[+] New connection. Active: ${stats.connectionsTotal}`);
     
     clientSocket.on('close', () => {
-      if (isActive) { isActive = false; stats.connectionsTotal--; } // Минус соединение
+      if (isActive) { isActive = false; stats.connectionsTotal--; } 
       log(`[-] Connection closed. Active: ${stats.connectionsTotal}`);
     });
     
@@ -47,7 +61,7 @@ function startProxy(port = 1080, host = '127.0.0.1') {
     clientSocket.on('data', (chunk) => {
       if (stage === 3) {
         if (remoteSocket && !remoteSocket.connecting && !remoteSocket.destroyed) {
-          stats.bytesUp += chunk.length; // Считаем ИСХОДЯЩИЙ трафик
+          stats.bytesUp += chunk.length; 
           
           if (isFirstPayload) {
             isFirstPayload = false;
@@ -127,7 +141,7 @@ function startProxy(port = 1080, host = '127.0.0.1') {
           stage = 3;
           
           if (buffer.length > 0) {
-            stats.bytesUp += buffer.length; // Считаем ИСХОДЯЩИЙ трафик
+            stats.bytesUp += buffer.length; 
             
             if (isFirstPayload && buffer.length > 1) {
               isFirstPayload = false;
@@ -150,7 +164,7 @@ function startProxy(port = 1080, host = '127.0.0.1') {
         });
 
         remoteSocket.on('data', (d) => { 
-          stats.bytesDown += d.length; // Считаем ВХОДЯЩИЙ трафик
+          stats.bytesDown += d.length; 
           if (!clientSocket.destroyed) clientSocket.write(d);
         });
 
@@ -170,13 +184,13 @@ function startProxy(port = 1080, host = '127.0.0.1') {
   proxyServer.on('error', (e) => { 
     isRunning = false; 
     proxyServer = null; 
-    log(`[FATAL] Server Error: ${e.message}`);
+    log(`[FATAL] Server Error: ${e.message}`, true);
   });
   
   proxyServer.listen(port, host, () => {
     isRunning = true;
     rn_bridge.channel.send(JSON.stringify({ type: 'status', isRunning: true, port, host }));
-    log(`Proxy started on ${host}:${port}`);
+    log(`Proxy started on ${host}:${port}`, true);
   });
 }
 
@@ -186,18 +200,21 @@ function stopProxy() {
     proxyServer = null;
     isRunning = false;
     rn_bridge.channel.send(JSON.stringify({ type: 'status', isRunning: false }));
-    log(`Proxy stopped`);
+    log(`Proxy stopped`, true);
   }
 }
 
 rn_bridge.channel.on('message', (msgStr) => {
   try {
     const msg = JSON.parse(msgStr);
-    if (msg.type === 'start') startProxy(msg.port || 1080, msg.host || '127.0.0.1');
+    if (msg.type === 'start') {
+      // ПЕРЕДАЕМ НАСТРОЙКИ ИЗ APP.TSX В ФУНКЦИЮ START
+      startProxy(msg.port || 1080, msg.host || '127.0.0.1', msg.config || {});
+    }
     else if (msg.type === 'stop') stopProxy();
     else if (msg.type === 'get_stats') rn_bridge.channel.send(JSON.stringify({ type: 'stats', stats }));
     else if (msg.type === 'get_status') rn_bridge.channel.send(JSON.stringify({ type: 'status', isRunning }));
   } catch (e) {}
 });
 
-log("Node was initialized. (Pure TCP + Port 443 + Safe DPI Bypass + Stats Fixed)");
+log("Node was initialized. (Pure TCP + Port 443 + Safe DPI Bypass + Settings Linked)", true);
